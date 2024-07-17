@@ -40,7 +40,8 @@ class Inertia
         return [
             'page' => json_encode($page),
             'css' => $this->css,
-            'js' => $this->js
+            'js' => $this->js,
+            'props' => $page['props']
         ];
     }
 
