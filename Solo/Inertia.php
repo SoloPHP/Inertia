@@ -68,7 +68,7 @@ class Inertia
         ];
     }
 
-    public function fetchRootTpl(array $props = []): string
+    private function fetchRootTpl(array $props = []): string
     {
         extract($props);
 
