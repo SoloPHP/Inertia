@@ -27,7 +27,7 @@ class Inertia
 
         $page = $this->getPage($request, $component, $props);
         if ($request->hasHeader('X-Inertia')) {
-            $response->getBody()->write(json_encode($page));
+            $response->getBody()->write(json_encode($page,JSON_UNESCAPED_UNICODE | JSON_HEX_APOS | JSON_HEX_QUOT));
             return $response->withHeader('Content-Type', 'application/json');
         }
         $data = $this->fetchRootTpl(['app' => $this->getRootTplVars($page)]);
@@ -38,7 +38,7 @@ class Inertia
     private function getRootTplVars(array $page): array
     {
         return [
-            'page' => json_encode($page),
+            'page' => json_encode($page, JSON_UNESCAPED_UNICODE | JSON_HEX_APOS | JSON_HEX_QUOT),
             'css' => $this->css,
             'js' => $this->js,
             'props' => $page['props']
