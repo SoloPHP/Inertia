@@ -1,5 +1,8 @@
 # Inertia PSR Adapter
 
+[![Version](https://img.shields.io/badge/version-1.1.2-blue.svg)](https://github.com/username/inertia-psr/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A PSR-7 and PSR-15 compatible adapter for Inertia.js, enabling seamless server-side integration with any PHP framework that implements these standards.
 
 ## Features
@@ -13,7 +16,7 @@ A PSR-7 and PSR-15 compatible adapter for Inertia.js, enabling seamless server-s
 ## Installation
 
 ```bash
-composer require solo/inertia-psr
+composer require solophp/inertia
 ```
 
 ## Usage
