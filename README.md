@@ -1,7 +1,8 @@
 # Inertia PSR Adapter
 
-[![Version](https://img.shields.io/badge/version-1.1.2-blue.svg)](https://github.com/username/inertia-psr/releases)
+[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/username/inertia-psr/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PHP Version](https://img.shields.io/badge/php-%3E%3D8.1-8892BF.svg)](https://php.net/)
 
 A PSR-7 and PSR-15 compatible adapter for Inertia.js, enabling seamless server-side integration with any PHP framework that implements these standards.
 
@@ -12,6 +13,8 @@ A PSR-7 and PSR-15 compatible adapter for Inertia.js, enabling seamless server-s
 - Support for partial reloads and asset versioning
 - Compatible with any PSR-7 compliant framework
 - Proper handling of JSON and HTML responses based on request type
+- Type-safe implementation with readonly properties
+- Final classes for better predictability
 
 ## Installation
 
@@ -41,8 +44,7 @@ $inertia = new Inertia(
 ```php
 use Solo\Inertia\InertiaMiddleware;
 
-// Using your container
-$middleware = new InertiaMiddleware($container);
+$middleware = new InertiaMiddleware($assetsVersion);
 ```
 
 ### Rendering Pages
@@ -89,11 +91,27 @@ The adapter automatically handles Inertia's partial reload feature through the `
 
 Asset versioning is supported through the `assetsVersion` parameter, helping with cache busting and ensuring clients always have the latest assets.
 
+### Type Safety
+
+- All classes are marked as `final` to prevent inheritance issues
+- Properties are marked as `readonly` for better immutability
+- Strict typing is enforced throughout the codebase
+
 ### HTTP Method Override
 
 The middleware automatically adjusts response status codes for specific HTTP methods:
 - Converts 302 responses to 303 for PUT, PATCH, and DELETE requests
 - Handles version mismatch redirects for GET requests
+
+### Dependency Injection
+
+The middleware now accepts the assets version directly, removing the container dependency for better flexibility and testing.
+
+## Requirements
+
+- PHP 8.1 or higher
+- PSR-7 HTTP message implementation
+- PSR-15 HTTP server-request handler implementation
 
 ## Contributing
 

@@ -2,22 +2,46 @@
 
 namespace Solo\Inertia;
 
-use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-class InertiaMiddleware implements MiddlewareInterface
+/**
+ * Middleware for handling Inertia.js requests and responses.
+ *
+ * This middleware enforces Inertia protocol requirements by:
+ * - Checking asset version mismatches and triggering client-side redirects
+ * - Adjusting redirect status codes for non-GET requests
+ * - Setting appropriate Inertia headers
+ *
+ * @see https://inertiajs.com/the-protocol
+ */
+final class InertiaMiddleware implements MiddlewareInterface
 {
-    private string $assetsVersion;
-    private ContainerInterface $container;
-
-    public function __construct(ContainerInterface $container)
+    /**
+     * Initialize the middleware with assets version for cache busting.
+     *
+     * @param string $assetsVersion Version identifier for detecting asset changes
+     */
+    public function __construct(
+        private readonly string $assetsVersion
+    )
     {
-        $this->assetsVersion = $container->get('assetsVersion');
     }
 
+    /**
+     * Process an incoming server request.
+     *
+     * Handles Inertia-specific protocol requirements:
+     * - Triggers full page reload when asset versions mismatch
+     * - Converts 302 redirects to 303 for PUT/PATCH/DELETE requests
+     * - Adds appropriate Inertia headers to responses
+     *
+     * @param ServerRequestInterface $request The server request
+     * @param RequestHandlerInterface $handler The request handler
+     * @return ResponseInterface The processed response
+     */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         if (!$request->hasHeader('X-Inertia')) {
