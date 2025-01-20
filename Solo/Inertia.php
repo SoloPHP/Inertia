@@ -46,7 +46,7 @@ final class Inertia
      */
     public function render(ServerRequestInterface $request, ResponseInterface $response, string $component, array $props = []): ResponseInterface
     {
-        $props += $request->getAttribute('inertiaCommonProps') ?? [];
+        $props += $request->getAttribute('sharedProps') ?? [];
 
         $page = $this->getPage($request, $component, $props);
         if ($request->hasHeader('X-Inertia')) {

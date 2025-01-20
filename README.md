@@ -15,6 +15,7 @@ A PSR-7 and PSR-15 compatible adapter for Inertia.js, enabling seamless server-s
 - Proper handling of JSON and HTML responses based on request type
 - Type-safe implementation with readonly properties
 - Final classes for better predictability
+- Shared props support across all pages
 
 ## Installation
 
@@ -63,6 +64,23 @@ $response = $inertia->render(
 );
 ```
 
+### Shared Properties
+
+You can share data with all pages by setting the `sharedProps` request attribute:
+
+```php
+$request = $request->withAttribute('sharedProps', [
+    'auth' => [
+        'user' => $currentUser,
+    ],
+    'flash' => [
+        'message' => $flashMessage,
+    ],
+]);
+```
+
+These props will be automatically merged with page-specific props during rendering.
+
 ### Root Template Example
 
 Create a root template (e.g., `root.php`):
@@ -90,6 +108,10 @@ The adapter automatically handles Inertia's partial reload feature through the `
 ### Asset Versioning
 
 Asset versioning is supported through the `assetsVersion` parameter, helping with cache busting and ensuring clients always have the latest assets.
+
+### Shared Properties
+
+The adapter supports sharing common data across all pages through the `sharedProps` request attribute. This is useful for data that should be available everywhere, such as user authentication status or flash messages.
 
 ### Type Safety
 
