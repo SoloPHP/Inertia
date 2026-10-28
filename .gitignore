@@ -1,7 +1,12 @@
-!.gitignore
-vendor
+/vendor/
 composer.lock
-example
+/.phpunit.cache/
+.phpunit.result.cache
 .idea
+.vscode/
 .DS_Store
 Thumbs.db
+docs/node_modules/
+docs/package-lock.json
+docs/.vitepress/cache/
+docs/.vitepress/dist/

@@ -1,0 +1,8 @@
+parameters:
+    level: max
+    paths:
+        - src
+        - tests
+    excludePaths:
+        # Root templates: plain PHP that prints its variables
+        - tests/Fixtures/templates
