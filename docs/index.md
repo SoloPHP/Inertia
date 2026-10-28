@@ -44,7 +44,8 @@ features:
 ---
 
 <style>
-:root {
+/* On .VPHome, not :root: the build puts the theme's own :root defaults after this rule */
+.VPHome {
   --vp-home-hero-name-color: transparent;
   --vp-home-hero-name-background: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
   --vp-home-hero-image-background-image: linear-gradient(135deg, #8b5cf630 0%, #06b6d430 100%);
