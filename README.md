@@ -1,21 +1,12 @@
-# Inertia PSR Adapter
+# Solo Inertia
 
-[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/username/inertia-psr/releases)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![PHP Version](https://img.shields.io/badge/php-%3E%3D8.1-8892BF.svg)](https://php.net/)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/solophp/inertia.svg)](https://packagist.org/packages/solophp/inertia)
+[![PHP Version](https://img.shields.io/badge/PHP-8.3%2B-8892BF.svg)](https://php.net/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-A PSR-7 and PSR-15 compatible adapter for Inertia.js, enabling seamless server-side integration with any PHP framework that implements these standards.
+An [Inertia.js 3](https://inertiajs.com) server adapter for PSR-7 and PSR-15: build a single-page app with Svelte, Vue or React and server-side routing and controllers, in any PSR framework. It implements the whole [protocol](https://inertiajs.com/docs/v3/core-concepts/the-protocol): partial reloads, deferred, optional, always, merge, once and infinite scroll props, version conflicts, external and fragment redirects, validation errors and error bags, flash data, history encryption, Precognition and server-side rendering.
 
-## Features
-
-- Full PSR-7 HTTP message interface support
-- PSR-15 middleware for handling Inertia-specific headers and responses
-- Support for partial reloads and asset versioning
-- Compatible with any PSR-7 compliant framework
-- Proper handling of JSON and HTML responses based on request type
-- Type-safe implementation with readonly properties
-- Final classes for better predictability
-- Shared props support across all pages
+> Upgrading from 1.x? Read the [upgrade guide](https://solophp.github.io/Inertia/guide/upgrading). 2.0 speaks the Inertia 3 protocol and needs an Inertia 3 client.
 
 ## Installation
 
@@ -23,122 +14,50 @@ A PSR-7 and PSR-15 compatible adapter for Inertia.js, enabling seamless server-s
 composer require solophp/inertia
 ```
 
-## Usage
+Requires PHP 8.3+, a PSR-7 implementation with PSR-17 factories, and an Inertia.js 3 client such as `@inertiajs/svelte`.
 
-### Basic Setup
-
-1. First, configure the Inertia class with your root template and asset information:
+## Example
 
 ```php
-use Solo\Inertia;
+use Solo\Inertia\CookieFlashStore;
+use Solo\Inertia\Inertia;
+use Solo\Inertia\PhpRootView;
 
 $inertia = new Inertia(
-    rootTpl: '/path/to/root.php',
-    assetsVersion: '1.0.0',
-    js: '/dist/app.js',
-    css: '/dist/app.css'
+    new PhpRootView(__DIR__ . '/resources/views/app.php'),
+    version: $assetVersion,
+    flash: new CookieFlashStore($appKey),
 );
-```
 
-2. Add the InertiaMiddleware to your middleware stack:
-
-```php
-use Solo\Inertia\InertiaMiddleware;
-
-$middleware = new InertiaMiddleware($assetsVersion);
-```
-
-### Rendering Pages
-
-To render an Inertia page:
-
-```php
-$response = $inertia->render(
-    $request,
-    $response,
-    'Pages/Users/Index',
-    [
-        'users' => $users,
-        'filters' => $filters
-    ]
-);
-```
-
-### Shared Properties
-
-You can share data with all pages by setting the `sharedProps` request attribute:
-
-```php
-$request = $request->withAttribute('sharedProps', [
-    'auth' => [
-        'user' => $currentUser,
-    ],
-    'flash' => [
-        'message' => $flashMessage,
-    ],
+// A handler: the HTML document on a first visit, the page object as JSON afterwards
+return $inertia->render($request, $response, 'Tasks/Index', [
+    'tasks' => fn() => $tasks->all(),                 // called only when sent
+    'stats' => Inertia::defer(fn() => $tasks->stats()), // loaded right after the page
 ]);
+
+// After a form: errors back to it, or a redirect with a message
+return $inertia->back($request, $response, errors: ['title' => 'The title is required.']);
+return $inertia->redirect($request, $response, '/tasks', flash: ['success' => 'Task created.']);
 ```
 
-These props will be automatically merged with page-specific props during rendering.
+`InertiaMiddleware` handles stale assets (a `409` before any handler runs), turns a `302` after `PUT`, `PATCH` or `DELETE` into a `303`, and makes redirects with a fragment reach the client. Shared props come from any middleware: `$handler->handle(Inertia::share($request, ['auth.user' => fn() => $user]))`.
 
-### Root Template Example
+The [Svelte skeleton](https://github.com/SoloPHP/Inertia-Svelte-Skeleton) is a complete application built with it.
 
-Create a root template (e.g., `root.php`):
+## Documentation
 
-```php
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <link href="<?= $css ?>" rel="stylesheet">
-    <script src="<?= $js ?>" defer></script>
-</head>
-<body>
-    <div id="app" data-page='<?= $page ?>'></div>
-</body>
-</html>
-```
+**[Full Documentation](https://solophp.github.io/Inertia/)**
 
-## Features in Detail
-
-### Partial Reloads
-
-The adapter automatically handles Inertia's partial reload feature through the `X-Inertia-Partial-Data` header, allowing for efficient partial page updates.
-
-### Asset Versioning
-
-Asset versioning is supported through the `assetsVersion` parameter, helping with cache busting and ensuring clients always have the latest assets.
-
-### Shared Properties
-
-The adapter supports sharing common data across all pages through the `sharedProps` request attribute. This is useful for data that should be available everywhere, such as user authentication status or flash messages.
-
-### Type Safety
-
-- All classes are marked as `final` to prevent inheritance issues
-- Properties are marked as `readonly` for better immutability
-- Strict typing is enforced throughout the codebase
-
-### HTTP Method Override
-
-The middleware automatically adjusts response status codes for specific HTTP methods:
-- Converts 302 responses to 303 for PUT, PATCH, and DELETE requests
-- Handles version mismatch redirects for GET requests
-
-### Dependency Injection
-
-The middleware now accepts the assets version directly, removing the container dependency for better flexibility and testing.
-
-## Requirements
-
-- PHP 8.1 or higher
-- PSR-7 HTTP message implementation
-- PSR-15 HTTP server-request handler implementation
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+- [Installation](https://solophp.github.io/Inertia/guide/installation)
+- [Quick Start](https://solophp.github.io/Inertia/guide/quick-start)
+- [Upgrading from 1.x](https://solophp.github.io/Inertia/guide/upgrading)
+- [Responses](https://solophp.github.io/Inertia/features/responses) and [Root Template](https://solophp.github.io/Inertia/features/root-template)
+- [Shared Data](https://solophp.github.io/Inertia/features/shared-data) and [Partial Reloads](https://solophp.github.io/Inertia/features/partial-reloads)
+- [Deferred](https://solophp.github.io/Inertia/features/deferred-props), [Merging](https://solophp.github.io/Inertia/features/merging-props) and [Once](https://solophp.github.io/Inertia/features/once-props) Props, [Infinite Scroll](https://solophp.github.io/Inertia/features/infinite-scroll)
+- [Redirects](https://solophp.github.io/Inertia/features/redirects), [Validation and Precognition](https://solophp.github.io/Inertia/features/validation) and [Flash Data](https://solophp.github.io/Inertia/features/flash-data)
+- [History Encryption](https://solophp.github.io/Inertia/features/history-encryption), [Asset Versioning](https://solophp.github.io/Inertia/features/asset-versioning) and [Server-Side Rendering](https://solophp.github.io/Inertia/features/ssr)
+- [Testing](https://solophp.github.io/Inertia/features/testing) and the [API Reference](https://solophp.github.io/Inertia/api/inertia)
 
 ## License
 
-This project is open-sourced software licensed under the MIT license.
+MIT. See [LICENSE](LICENSE).
